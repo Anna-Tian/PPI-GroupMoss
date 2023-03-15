@@ -1,9 +1,14 @@
-void setup() {
-  // put your setup code here, to run once:
+#define BUZZER_PIN 6
 
+void setup()
+{
+  pinMode(BUZZER_PIN, OUTPUT);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
+void loop()
+{
+  digitalWrite(BUZZER_PIN, HIGH);
+  delay(1000);
+  digitalWrite(BUZZER_PIN, LOW);
+  delay(1000);
 }
