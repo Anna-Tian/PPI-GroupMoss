@@ -64,6 +64,10 @@ void loop()
     }
     // ---------------- Buzzer end ----------------
 
+    // ---------------- Vibrator ----------------
+    playVibration(buzzerTempo);
+    // ---------------- Vibrator end----------------
+
     Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
   } else {
     Serial.print(ultrasonicDistance);//0~400cm
