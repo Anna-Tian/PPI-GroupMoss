@@ -1,12 +1,20 @@
 #include <Ultrasonic.h>
 
-#include <Adafruit_NeoPixel.h>
+#include <Adafruit_NeoPixel.h>  // LED ring
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
 Ultrasonic ultrasonic(7);
+
+// ---------------- Buzzer ----------------
 #define Buzzer_PIN 3
+int buzzerLength = 4;
+char buzzerNotes[] = "gec ";
+int buzzerBeats[] = {1, 1, 2};
+int buzzerTempo = 300;
+// ---------------- Buzzer end ----------------
+
 #define Vibration_PIN 2
 
 // ---------------- LED ring ----------------
@@ -33,43 +41,42 @@ void setup()
   pinMode(Buzzer_PIN, OUTPUT);
   pinMode(Vibration_PIN, OUTPUT );
 
+  // ---------------- LED ring ----------------
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
   strip.setBrightness(BRIGHTNESS);
+  // ---------------- LED ring end ----------------
 }
 
 void loop()
 {
-  // ---------------- Ultrasonic distance sensor ----------------
-  // long RangeInInches;
-  // long RangeInCentimeters;
+  //---------------- Ultrasonic distance sensor ----------------
+  long ultrasonicDistance;
+  ultrasonicDistance = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
+  
+  if (ultrasonicDistance < 11) {
+    // ---------------- Buzzer ----------------
+    for(int i = 0; i < buzzerLength; i++) {
+      if(buzzerNotes[i] != ' ') {
+        playBuzzer(buzzerNotes[i], buzzerBeats[i] * buzzerTempo);
+      }
+        delay(buzzerTempo / 2);    /* delay between notes */
+    }
+    // ---------------- Buzzer end ----------------
 
-  // Serial.println("The distance to obstacles in front is: ");
-  // RangeInInches = ultrasonic.MeasureInInches();
-  // Serial.print(RangeInInches);//0~157 inches
-  // Serial.println(" inch");
-  // delay(250);
-
-  // RangeInCentimeters = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
-  // Serial.print(RangeInCentimeters);//0~400cm
-  // Serial.println(" cm");
-  // delay(250);
-  // ---------------- Ultrasonic distance sensor end ----------------
-
-
-  // ---------------- Buzzer ----------------
-  // digitalWrite(Buzzer_PIN, HIGH);
-  // delay(1000);
-  // digitalWrite(Buzzer_PIN, LOW);
-  // delay(1000);
-  // ---------------- Buzzer end ----------------
+    Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
+  } else {
+    Serial.print(ultrasonicDistance);//0~400cm
+    Serial.println(" cm");
+  }
+  //---------------- Ultrasonic distance sensor end ----------------
 
   // ---------------- Vibrator ----------------
-  digitalWrite(Vibration_PIN, HIGH);
-  delay(1000);
+  // digitalWrite(Vibration_PIN, HIGH);
+  // delay(1000);
 
-  digitalWrite(Vibration_PIN, LOW);
-  delay(1000);
+  // digitalWrite(Vibration_PIN, LOW);
+  // delay(1000);
   // ---------------- Vibrator end----------------
 
   // ringFlesh(5);
