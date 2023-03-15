@@ -12,12 +12,12 @@ Ultrasonic ultrasonic(7);
 // ---------------- Buzzer ----------------
 #define Buzzer_PIN 3
 bool buzzerState = false;
-Metro buzzerMetro = Metro(500); //buzzer interval in millis
+Metro buzzerMetro = Metro(600); //buzzer interval in millis
 
 // ---------------- Vibrator ----------------
 #define Vibration_PIN 2
 bool vibratorState = false;
-Metro vibratorMetro = Metro(600); //vibrator interval in millis
+Metro vibratorMetro = Metro(300); //vibrator interval in millis
 
 // ---------------- LED ring ----------------
 #define LED_PIN     6
@@ -40,9 +40,7 @@ void setup()
 void loop()
 {
   long ultrasonicDistance = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
-  Serial.println((String)ultrasonicDistance + " cm");
   
-
   if (ultrasonicDistance < 11) {
     // ---------------- Buzzer ----------------
     if(buzzerMetro.check()) {
@@ -55,27 +53,17 @@ void loop()
       vibratorState = !vibratorState;
       digitalWrite(Vibration_PIN, vibratorState);
     }
+
+    // ---------------- LED ring ----------------
+    strip.fill(strip.Color(0, 0, 0, 255));
+    strip.show();
+
+    Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
   } else {
     digitalWrite(Buzzer_PIN, LOW);
     digitalWrite(Vibration_PIN, LOW);
-  }
-
-  // Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
-
-  // ringFlesh(5);
-}
-
-void ringFlesh(uint8_t wait) {
-  for(int j=0; j<256; j++) { // Ramp up from 0 to 255
-    // Fill entire strip with white at gamma-corrected brightness level 'j':
-    strip.fill(strip.Color(0, 0, 0, strip.gamma8(j)));
+    strip.fill(strip.Color(0, 0, 0, 0));
     strip.show();
-    delay(wait);
-  }
-
-  for(int j=255; j>=0; j--) { // Ramp down from 255 to 0
-    strip.fill(strip.Color(0, 0, 0, strip.gamma8(j)));
-    strip.show();
-    delay(wait);
+    Serial.println((String)ultrasonicDistance + " cm");
   }
 }
