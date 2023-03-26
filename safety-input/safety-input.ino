@@ -1,16 +1,20 @@
+#include <SoftwareSerial.h>
+
 #include <Ultrasonic.h>
+
 Ultrasonic ultrasonic(5);
-
+SoftwareSerial mySerial(2,3);
+char distance[10];
 void setup() {
-  Serial.begin(9600);
-
+  Serial.begin(19200);
+  mySerial.begin(9600);
+  Serial.println("Test begin");
 }
 
 void loop() {
-  long ultrasonicDistance = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
-  if(ultrasonicDistance < 30 && ultrasonicDistance !=0) {
-    Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
-  }else {
-    Serial.println((String)"all good");
-  }
+  int ultrasonicDistance = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
+  sprintf(distance,"%i\r",ultrasonicDistance);
+  mySerial.write(distance);
+  mySerial.write("\n");
+  delay(500);
 }

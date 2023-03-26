@@ -11,21 +11,21 @@
 
 SoftwareSerial mySerial(2,3);
 
-// ---------------- Buzzer ----------------
-#define Buzzer_PIN 3
-bool buzzerState = false;
-Metro buzzerMetro = Metro(600); // buzzer interval in millis
+// // ---------------- Buzzer ----------------
+// #define Buzzer_PIN 3
+// bool buzzerState = false;
+// Metro buzzerMetro = Metro(600); // buzzer interval in millis
 
-// ---------------- Vibrator ----------------
-#define Vibration_PIN 2
-bool vibratorState = false;
-Metro vibratorMetro = Metro(300); // vibrator interval in millis
+// // ---------------- Vibrator ----------------
+// #define Vibration_PIN 2
+// bool vibratorState = false;
+// Metro vibratorMetro = Metro(300); // vibrator interval in millis
 
-// ---------------- LED ring ----------------
-#define LED_Ring_PIN 6
-#define LED_Ring_Count  60 // How many NeoPixels are attached to the Arduino?
-#define LED_Ring_Brightness 50 // Set LED_Ring_Brightness to about 1/5 (max = 255)
-Adafruit_NeoPixel strip(LED_Ring_Count, LED_Ring_PIN, NEO_GRBW + NEO_KHZ800); // Declare our NeoPixel strip object:
+// // ---------------- LED ring ----------------
+// #define LED_Ring_PIN 6
+// #define LED_Ring_Count  60 // How many NeoPixels are attached to the Arduino?
+// #define LED_Ring_Brightness 50 // Set LED_Ring_Brightness to about 1/5 (max = 255)
+// Adafruit_NeoPixel strip(LED_Ring_Count, LED_Ring_PIN, NEO_GRBW + NEO_KHZ800); // Declare our NeoPixel strip object:
 
 // ---------------- LED socket kit ----------------
 #define LED_Kit_PIN 4
@@ -34,19 +34,18 @@ Adafruit_NeoPixel strip(LED_Ring_Count, LED_Ring_PIN, NEO_GRBW + NEO_KHZ800); //
 #define LED_RGB_Count 5
 ChainableLED leds(7, 8, LED_RGB_Count);
 
-// bluetooth
-int info = 0;
+// ---------------- Bluetooth ----------------
 
 void setup()
 {
+  Serial.begin(19200);
   mySerial.begin(9600);
-  Serial.begin(9600);
   // pinMode(Buzzer_PIN, OUTPUT);
-  pinMode(Vibration_PIN, OUTPUT );
-  digitalWrite(Vibration_PIN, 0);
+  // pinMode(Vibration_PIN, OUTPUT );
+  // digitalWrite(Vibration_PIN, 0);
   pinMode(LED_Kit_PIN, OUTPUT);
   leds.init();
-  // Serial.println("Test begin");
+  Serial.println("Test begin");
   // // ---------------- LED ring ----------------
   // strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   // strip.show();            // Turn OFF all pixels ASAP
@@ -55,12 +54,16 @@ void setup()
 
 void loop()
 {
-  digitalWrite(LED_Kit_PIN, HIGH); 
-  leds.setColorRGB(0, 0, 255, 0);
-  
   if (mySerial.available()) {
-    // Serial.println("DATA RECEIVED:");
-    
+    int ultrasonicDistance = mySerial.readStringUntil('\n').toInt();
+    if (ultrasonicDistance < 30 && ultrasonicDistance !=0) {
+      // Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
+      digitalWrite(LED_Kit_PIN, HIGH); 
+      leds.setColorRGB(0, 255, 0, 0);
+    } else {
+      digitalWrite(LED_Kit_PIN, LOW); 
+      leds.setColorRGB(0, 0, 255, 0);
+    }
   }
   
   // if (ultrasonicDistance < 11) {
