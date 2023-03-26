@@ -11,18 +11,18 @@
 
 SoftwareSerial mySerial(2,3);
 
-// // ---------------- Buzzer ----------------
-// #define Buzzer_PIN 3
-// bool buzzerState = false;
-// Metro buzzerMetro = Metro(600); // buzzer interval in millis
+// ---------------- Buzzer ----------------
+#define Buzzer_PIN 3
+bool buzzerState = false;
+Metro buzzerMetro = Metro(600); // buzzer interval in millis
 
-// // ---------------- Vibrator ----------------
-// #define Vibration_PIN 2
-// bool vibratorState = false;
-// Metro vibratorMetro = Metro(300); // vibrator interval in millis
+// ---------------- Vibrator ----------------
+#define Vibration_PIN 6
+bool vibratorState = false;
+Metro vibratorMetro = Metro(300); // vibrator interval in millis
 
 // // ---------------- LED ring ----------------
-// #define LED_Ring_PIN 6
+// #define LED_Ring_PIN 2
 // #define LED_Ring_Count  60 // How many NeoPixels are attached to the Arduino?
 // #define LED_Ring_Brightness 50 // Set LED_Ring_Brightness to about 1/5 (max = 255)
 // Adafruit_NeoPixel strip(LED_Ring_Count, LED_Ring_PIN, NEO_GRBW + NEO_KHZ800); // Declare our NeoPixel strip object:
@@ -35,16 +35,24 @@ SoftwareSerial mySerial(2,3);
 ChainableLED leds(7, 8, LED_RGB_Count);
 
 // ---------------- Bluetooth ----------------
+#define Button_PIN 5
+bool isPressed = false;
 
 void setup()
 {
   Serial.begin(19200);
   mySerial.begin(9600);
-  // pinMode(Buzzer_PIN, OUTPUT);
-  // pinMode(Vibration_PIN, OUTPUT );
-  // digitalWrite(Vibration_PIN, 0);
+
+  pinMode(Buzzer_PIN, OUTPUT);
+  digitalWrite(Buzzer_PIN, 0);
+
+  pinMode(Vibration_PIN, OUTPUT );
+  digitalWrite(Vibration_PIN, 0);
+
   pinMode(LED_Kit_PIN, OUTPUT);
   leds.init();
+
+  pinMode(Button_PIN, INPUT);
   Serial.println("Test begin");
   // // ---------------- LED ring ----------------
   // strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -56,40 +64,49 @@ void loop()
 {
   if (mySerial.available()) {
     int ultrasonicDistance = mySerial.readStringUntil('\n').toInt();
-    if (ultrasonicDistance < 30 && ultrasonicDistance !=0) {
+    if (ultrasonicDistance < 30 && ultrasonicDistance !=0 && !isPressed) {
       // Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
+      
+      // ---------------- Buzzer ----------------
+      if(buzzerMetro.check()) {
+        buzzerState = !buzzerState;
+        digitalWrite(Buzzer_PIN, buzzerState);
+      }
+      // ---------------- Vibrator ----------------
+      if(vibratorMetro.check()) {
+        vibratorState = !vibratorState;
+        digitalWrite(Vibration_PIN, vibratorState);
+      }
+      // ---------------- LED ----------------
       digitalWrite(LED_Kit_PIN, HIGH); 
       leds.setColorRGB(0, 255, 0, 0);
+
+      // ---------------- press button to stop playing ----------------
+      if (digitalRead(Button_PIN) == HIGH) {
+        isPressed = true;
+      }
+    } else if (ultrasonicDistance < 30 && ultrasonicDistance !=0 && isPressed) {
+      leds.setColorRGB(0, 0, 0, 255);
+      stopPlaying();
     } else {
-      digitalWrite(LED_Kit_PIN, LOW); 
+      isPressed = false;
       leds.setColorRGB(0, 0, 255, 0);
+      stopPlaying();
     }
   }
-  
-  // if (ultrasonicDistance < 11) {
-  //   // ---------------- Buzzer ----------------
-  //   if(buzzerMetro.check()) {
-  //     buzzerState = !buzzerState;
-  //     digitalWrite(Buzzer_PIN, buzzerState);
-  //   }
 
-  //   // ---------------- Vibrator ----------------
-  //   if(vibratorMetro.check()) {
-  //     vibratorState = !vibratorState;
-  //     digitalWrite(Vibration_PIN, vibratorState);
-  //   }
 
   //   // ---------------- LED ring ----------------
   //   strip.fill(strip.Color(0, 0, 0, 255));
   //   strip.show();
 
     
-  //   Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
-  // } else {
-  //   digitalWrite(Buzzer_PIN, LOW);
-  //   digitalWrite(Vibration_PIN, LOW);
   //   strip.fill(strip.Color(0, 0, 0, 0));
   //   strip.show();
-  //   // Serial.println((String)ultrasonicDistance + " cm");
-  // }
+}
+
+void stopPlaying() {
+  digitalWrite(LED_Kit_PIN, LOW); 
+  digitalWrite(Buzzer_PIN, false);
+  digitalWrite(Vibration_PIN, false);
 }
