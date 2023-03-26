@@ -1,6 +1,8 @@
+#include <ChainableLED.h>
+
 #include <SoftwareSerial.h>
 
-#include <Metro.h>
+#include <Metro.h> // make multiple output run at same time
 
 #include <Ultrasonic.h>
 
@@ -10,7 +12,7 @@
 #endif
 
 SoftwareSerial mySerial(2,3);
-Ultrasonic ultrasonic(7);
+Ultrasonic ultrasonic(5);
 
 // ---------------- Buzzer ----------------
 #define Buzzer_PIN 3
@@ -23,10 +25,17 @@ bool vibratorState = false;
 Metro vibratorMetro = Metro(300); // vibrator interval in millis
 
 // ---------------- LED ring ----------------
-#define LED_PIN     6
-#define LED_COUNT  60 // How many NeoPixels are attached to the Arduino?
-#define BRIGHTNESS 50 // Set BRIGHTNESS to about 1/5 (max = 255)
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800); // Declare our NeoPixel strip object:
+#define LED_Ring_PIN 6
+#define LED_Ring_Count  60 // How many NeoPixels are attached to the Arduino?
+#define LED_Ring_Brightness 50 // Set LED_Ring_Brightness to about 1/5 (max = 255)
+Adafruit_NeoPixel strip(LED_Ring_Count, LED_Ring_PIN, NEO_GRBW + NEO_KHZ800); // Declare our NeoPixel strip object:
+
+// ---------------- LED socket kit ----------------
+#define LED_Kit_PIN 4
+
+// ---------------- LED chainable RGB ----------------
+#define LED_RGB_Count 5
+ChainableLED leds(7, 8, LED_RGB_Count);
 
 // bluetooth
 int info = 0;
@@ -38,16 +47,20 @@ void setup()
   // pinMode(Buzzer_PIN, OUTPUT);
   pinMode(Vibration_PIN, OUTPUT );
   digitalWrite(Vibration_PIN, 0);
+  pinMode(LED_Kit_PIN, OUTPUT);
+  leds.init();
   // Serial.println("Test begin");
   // // ---------------- LED ring ----------------
   // strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   // strip.show();            // Turn OFF all pixels ASAP
-  // strip.setBrightness(BRIGHTNESS);
+  // strip.setLED_Ring_Brightness(LED_Ring_Brightness);
 }
 
 void loop()
 {
   long ultrasonicDistance = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
+  digitalWrite(LED_Kit_PIN, HIGH); 
+  leds.setColorRGB(0, 0, 255, 0);
   
   if (mySerial.available()) {
     // Serial.println("DATA RECEIVED:");
