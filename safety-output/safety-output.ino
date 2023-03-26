@@ -4,15 +4,12 @@
 
 #include <Metro.h> // make multiple output run at same time
 
-#include <Ultrasonic.h>
-
 #include <Adafruit_NeoPixel.h>  // LED ring
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
 SoftwareSerial mySerial(2,3);
-Ultrasonic ultrasonic(5);
 
 // ---------------- Buzzer ----------------
 #define Buzzer_PIN 3
@@ -58,21 +55,12 @@ void setup()
 
 void loop()
 {
-  long ultrasonicDistance = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
   digitalWrite(LED_Kit_PIN, HIGH); 
   leds.setColorRGB(0, 0, 255, 0);
   
   if (mySerial.available()) {
     // Serial.println("DATA RECEIVED:");
-    if(ultrasonicDistance < 11 && ultrasonicDistance !=0) {
-      digitalWrite(Vibration_PIN,1);
-      Serial.println((String)"led on: " + ultrasonicDistance + " cm");
-      mySerial.println((String)"bluetooth: led on: " + ultrasonicDistance + " cm");
-    }else {
-      digitalWrite(Vibration_PIN,0);
-      // Serial.println("led off");
-      // mySerial.println("bluetooth: led off");
-    }
+    
   }
   
   // if (ultrasonicDistance < 11) {
