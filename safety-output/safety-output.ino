@@ -64,7 +64,7 @@ void loop()
 {
   if (mySerial.available()) {
     int ultrasonicDistance = mySerial.readStringUntil('\n').toInt();
-    if (ultrasonicDistance < 30 && ultrasonicDistance !=0 && !isPressed) {
+    if (ultrasonicDistance < 15 && ultrasonicDistance !=0 && !isPressed) {
       // Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
       
       // ---------------- Buzzer ----------------

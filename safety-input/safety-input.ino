@@ -13,6 +13,7 @@ void setup() {
 
 void loop() {
   int ultrasonicDistance = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
+  Serial.println((String)"Stay Away! It's too close: " + ultrasonicDistance + " cm");
   sprintf(distance,"%i\r",ultrasonicDistance);
   mySerial.write(distance);
   mySerial.write("\n");
