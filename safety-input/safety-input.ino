@@ -19,7 +19,7 @@ void setup() {
   Serial.begin(9600);
   Status = VL53L0X.VL53L0X_common_init();
   if (VL53L0X_ERROR_NONE != Status) {
-      Serial.println("start vl53l0x mesurement failed!");
+      Serial.println("start vl53l0x mesurement failed!!!");
       VL53L0X.print_pal_error(Status);
       while (1);
   }
