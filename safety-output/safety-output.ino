@@ -1,10 +1,8 @@
 #include <ChainableLED.h>
-
 #include <SoftwareSerial.h>
-
-#include <Metro.h> // make multiple output run at same time
-
+#include <Metro.h> // make multiple output run at the same time
 #include <Adafruit_NeoPixel.h>  // LED ring
+
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
@@ -14,7 +12,10 @@ SoftwareSerial mySerial(2,3);
 // ---------------- Buzzer ----------------
 #define Buzzer_PIN 3
 bool buzzerState = false;
-Metro buzzerMetro = Metro(600); // buzzer interval in millis
+Metro buzzerMetro = Metro(600); // buzzer interval in millis, increased to 200ms
+unsigned long buzzerStartTime = 0;
+unsigned long buzzerDuration = 300; // buzzer duration in milliseconds
+unsigned long longBuzzerDuration = 600; // longer buzzer duration in milliseconds
 
 // ---------------- Vibrator ----------------
 #define Vibration_PIN 6
@@ -42,7 +43,8 @@ void setup()
 
   leds.init();
 
-  pinMode(Button_PIN, INPUT);
+  // pinMode(Button_PIN, INPUT);
+  pinMode(Button_PIN, INPUT_PULLUP);
   Serial.println("Test begin");
 }
 
@@ -50,11 +52,18 @@ void loop()
 {
   if (mySerial.available()) {
     int distance = mySerial.readStringUntil('\n').toInt();
-    if (distance < 300 && distance !=0 && !isPressed) {
+    if (distance < 1000 && distance !=0 && !isPressed) {
+      buzzerDuration = 300; // Set buzzer duration to normal
+
       // ---------------- Buzzer ----------------
       if(buzzerMetro.check()) {
         buzzerState = !buzzerState;
-        digitalWrite(Buzzer_PIN, buzzerState);
+        if(buzzerState) {
+          digitalWrite(Buzzer_PIN, HIGH); // turn on the buzzer
+          buzzerStartTime = millis(); // record the start time of the buzzer
+        } else {
+          digitalWrite(Buzzer_PIN, LOW); // turn off the buzzer
+        }
       }
       // ---------------- Vibrator ----------------
       if(vibratorMetro.check()) {
@@ -62,20 +71,38 @@ void loop()
         digitalWrite(Vibration_PIN, vibratorState);
       }
       // ---------------- LED ----------------
-      leds.setColorRGB(0, 255, 0, 0);
+      leds.setColorRGB(0, 255, 0, 0); // red color
 
       // ---------------- press button to stop playing ----------------
       if (digitalRead(Button_PIN) == HIGH) {
         isPressed = true;
       }
-    } else if (distance < 300 && distance !=0 && isPressed) {
-      leds.setColorRGB(0, 0, 0, 255);
-      stopPlaying();
+    } else if (distance < 1000 && distance !=0 && isPressed) {
+      buzzerDuration = longBuzzerDuration; // Set buzzer duration to shorter duration
+
+      // ---------------- Buzzer ----------------
+      if(buzzerMetro.check()) {
+        buzzerState = !buzzerState;
+        if(buzzerState) {
+          digitalWrite(Buzzer_PIN, HIGH); // turn on the buzzer
+          buzzerStartTime = millis(); // record the start time of the buzzer
+        } else {
+          digitalWrite(Buzzer_PIN, LOW); // turn off the buzzer
+        }
+      }
+      leds.setColorRGB(0, 204, 102, 0); // yellow color
+      digitalWrite(Vibration_PIN, false);
     } else {
       isPressed = false;
-      leds.setColorRGB(0, 0, 255, 0);
+      leds.setColorRGB(0, 0, 255, 0); //green color
       stopPlaying();
     }
+  }
+
+  // check if the buzzer has been on for longer than the desired duration
+  if(buzzerState && (millis() - buzzerStartTime >= buzzerDuration)) {
+    digitalWrite(Buzzer_PIN, LOW); // turn off the buzzer
+    buzzerState = false;
   }
 }
 
