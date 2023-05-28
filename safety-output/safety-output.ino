@@ -68,8 +68,8 @@ void loop() {
 
     Serial.println(abs(initialObjectTemp - prevObjectTemp));
 
-    buzzerMetro.check(); // 检查蜂鸣器定时器状态
-    vibratorMetro.check(); // 检查振动器定时器状态
+    buzzerMetro.check(); 
+    vibratorMetro.check(); 
 
     if (abs(initialObjectTemp - prevObjectTemp) >= 1.5) {
       Serial.println("isPressed: " + String(isPressed));
@@ -86,7 +86,7 @@ void loop() {
         vibrator(true);
         buzzer(true);
         leds.setColorRGB(0, 204, 102, 0);  // yellow color
-      } else if (distance < 1000 && distance != 0 && isPressed) {
+      } else if (distance < 1500 && distance != 0 && isPressed) {
         Serial.println("far and pressed");
         if (distance < 500) {
           leds.setColorRGB(0, 255, 0, 0);  // red color
@@ -107,7 +107,6 @@ void loop() {
 
   // check if the buzzer has been on for longer than the desired duration
   if (buzzerState && (millis() - buzzerStartTime >= buzzerDuration)) {
-    Serial.println("time" + String(millis() - buzzerStartTime));
     stopBuzzer();
   }
 
